@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip3 install meson --upgrade --break-system-packages
 
 WORKDIR /src
-RUN git clone --recurse-submodules -b main https://github.com/open5gs/open5gs
+RUN git clone --recurse-submodules -b v2.7.6 https://github.com/open5gs/open5gs
 WORKDIR /src/open5gs
 
 RUN meson setup build --prefix=/opt/open5gs && \
