@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open5gs-bsf
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: open5gs-bsf } }
+  template:
+    metadata: { labels: { app: open5gs-bsf } }
+    spec:
+      initContainers:
+        - name: wait-nrf
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z open5gs-nrf 7777; do sleep 2; done"]
+      containers:
+        - name: bsf
+          image: open5gs:v2.8.0
+          imagePullPolicy: Never
+          command: ["/opt/open5gs/bin/open5gs-bsfd"]
+          args: ["-c", "/etc/open5gs/bsf.yaml"]
+          ports: [{ containerPort: 7777 }]
+          volumeMounts: [{ name: config, mountPath: /etc/open5gs }]
+      volumes:
+        - name: config
+          configMap: { name: bsf-config }

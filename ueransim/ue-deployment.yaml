@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ueransim-ue
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: ueransim-ue } }
+  template:
+    metadata: { labels: { app: ueransim-ue } }
+    spec:
+      initContainers:
+        - name: wait-gnb
+          image: busybox:1.36
+          command: ["sh", "-c", "sleep 30"]
+      containers:
+        - name: ue
+          image: ueransim:latest
+          imagePullPolicy: Never
+          command: ["/usr/local/bin/nr-ue", "-c", "/etc/ueransim/ue.yaml"]
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["NET_ADMIN"]
+          volumeMounts:
+            - { name: config, mountPath: /etc/ueransim }
+            - { name: dev-net-tun, mountPath: /dev/net/tun }
+      volumes:
+        - name: config
+          configMap: { name: ue-config }
+        - name: dev-net-tun
+          hostPath: { path: /dev/net/tun }

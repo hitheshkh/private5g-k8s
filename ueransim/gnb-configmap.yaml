@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gnb-config
+  namespace: open5gs
+data:
+  gnb.yaml: |
+    mcc: '999'
+    mnc: '70'
+    nci: '0x000000010'
+    idLength: 32
+    ignoreStreamIds: true
+    tac: 1
+    linkIp: 192.168.49.2 
+    ngapIp: 192.168.49.2 
+    gtpIp: 192.168.49.2
+    amfConfigs:
+      - address: open5gs-amf
+        port: 38412
+    slices:
+      - sst: 1

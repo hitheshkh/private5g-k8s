@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open5gs-amf
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: open5gs-amf } }
+  template:
+    metadata: { labels: { app: open5gs-amf } }
+    spec:
+      initContainers:
+        - name: wait-nrf
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z open5gs-nrf 7777; do sleep 2; done"]
+      containers:
+        - name: amf
+          image: open5gs:v2.8.0
+          imagePullPolicy: Never
+          command: ["/opt/open5gs/bin/open5gs-amfd"]
+          args: ["-c", "/etc/open5gs/amf.yaml"]
+          ports:
+            - { containerPort: 7777 }
+            - { containerPort: 38412, protocol: SCTP }
+          volumeMounts: [{ name: config, mountPath: /etc/open5gs }]
+      volumes:
+        - name: config
+          configMap: { name: amf-config }

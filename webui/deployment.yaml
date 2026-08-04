@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open5gs-webui
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: open5gs-webui } }
+  template:
+    metadata: { labels: { app: open5gs-webui } }
+    spec:
+      containers:
+        - name: webui
+          image: open5gs-webui:v2.8.0
+          imagePullPolicy: Never
+          env:
+            - { name: DB_URI, value: "mongodb://mongodb/open5gs" }
+          ports: [{ containerPort: 9999 }]

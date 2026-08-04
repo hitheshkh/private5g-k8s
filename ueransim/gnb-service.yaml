@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ueransim-gnb
+  namespace: open5gs
+spec:
+  selector: { app: ueransim-gnb }
+  ports:
+    - { name: ngap, port: 38412, targetPort: 38412, protocol: SCTP }
+    - { name: rls, port: 4997, targetPort: 4997, protocol: UDP }

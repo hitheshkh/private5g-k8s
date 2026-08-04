@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ueransim-gnb
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: ueransim-gnb } }
+  template:
+    metadata: { labels: { app: ueransim-gnb } }
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+
+      initContainers:
+        - name: wait-amf
+          image: busybox:1.36
+          command: ["sh", "-c", "until nc -z open5gs-amf 7777; do sleep 2; done"]
+      containers:
+        - name: gnb
+          image: ueransim:latest
+          imagePullPolicy: Never
+          command: ["/usr/local/bin/nr-gnb", "-c", "/etc/ueransim/gnb.yaml"]
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["NET_ADMIN"]
+          volumeMounts: [{ name: config, mountPath: /etc/ueransim }]
+      volumes:
+        - name: config
+          configMap: { name: gnb-config }

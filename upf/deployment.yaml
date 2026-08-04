@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open5gs-upf
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: open5gs-upf } }
+  template:
+    metadata: { labels: { app: open5gs-upf } }
+    spec:
+      containers:
+        - name: upf
+          image: open5gs:v2.8.0
+          imagePullPolicy: Never
+          command:
+            - sh
+            - -c
+            - |
+              ip tuntap add name ogstun mode tun
+              ip addr add 10.45.0.1/16 dev ogstun
+              ip link set ogstun up
+              iptables -t nat -A POSTROUTING -s 10.45.0.0/16 ! -o ogstun -j MASQUERADE
+              exec /opt/open5gs/bin/open5gs-upfd -c /etc/open5gs/upf.yaml
+          securityContext:
+            privileged: true
+            capabilities:
+              add: ["NET_ADMIN"]
+          ports:
+            - { containerPort: 8805, protocol: UDP }
+            - { containerPort: 2152, protocol: UDP }
+          volumeMounts:
+            - { name: config, mountPath: /etc/open5gs }
+            - { name: dev-net-tun, mountPath: /dev/net/tun }
+      volumes:
+        - name: config
+          configMap: { name: upf-config }
+        - name: dev-net-tun
+          hostPath: { path: /dev/net/tun }

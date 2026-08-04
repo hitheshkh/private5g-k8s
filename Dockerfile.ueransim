@@ -1,0 +1,36 @@
+FROM ubuntu:24.04 AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+make gcc g++ libsctp-dev lksctp-tools iproute2 iputils-ping \
+wget git cmake build-essential && \
+rm -rf /var/lib/apt/lists/*
+
+# UERANSIM needs a recent CMake
+RUN wget -qO- https://github.com/Kitware/CMake/releases/download/v3.27.7/cmake-3.27.7-linux-x86_64.tar.gz \
+| tar --strip-components=1 -xz -C /usr/local
+
+WORKDIR /src
+
+RUN git clone --recurse-submodules -b v3.2.7 https://github.com/aligungr/UERANSIM
+
+WORKDIR /src/UERANSIM
+
+RUN make -j"$(nproc)"
+
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+libsctp1 iproute2 iputils-ping tcpdump iptables && \
+rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /src/UERANSIM/build/nr-gnb /usr/local/bin/nr-gnb
+COPY --from=builder /src/UERANSIM/build/nr-ue /usr/local/bin/nr-ue
+COPY --from=builder /src/UERANSIM/build/nr-cli /usr/local/bin/nr-cli
+
+RUN mkdir -p /etc/ueransim
+
+WORKDIR /usr/local/bin

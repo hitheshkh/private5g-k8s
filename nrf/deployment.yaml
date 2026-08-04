@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: open5gs-nrf
+  namespace: open5gs
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: open5gs-nrf }
+  template:
+    metadata:
+      labels: { app: open5gs-nrf }
+    spec:
+      containers:
+        - name: nrf
+          image: open5gs:v2.8.0
+          imagePullPolicy: Never
+          command: ["/opt/open5gs/bin/open5gs-nrfd"]
+          args: ["-c", "/etc/open5gs/nrf.yaml"]
+          ports:
+            - containerPort: 7777
+          volumeMounts:
+            - name: config
+              mountPath: /etc/open5gs
+      volumes:
+        - name: config
+          configMap: { name: nrf-config }

@@ -1,0 +1,45 @@
+# ---------- Stage 1: Build ----------
+FROM ubuntu:24.04 AS builder
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    python3 python3-pip python3-setuptools python3-wheel ninja-build build-essential \
+    flex bison git pkg-config wget cmake \
+    libsctp-dev libgnutls28-dev libgcrypt-dev libssl-dev libidn11-dev \
+    libmongoc-dev libbson-dev libyaml-dev \
+    libnghttp2-dev libmicrohttpd-dev libcurl4-openssl-dev \
+    libtalloc-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install meson --upgrade --break-system-packages
+
+WORKDIR /src
+RUN git clone --recurse-submodules -b main https://github.com/open5gs/open5gs
+WORKDIR /src/open5gs
+
+RUN meson setup build --prefix=/opt/open5gs && \
+    ninja -C build && \
+    ninja -C build install
+
+# ---------- Stage 2: Runtime ----------
+FROM ubuntu:24.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+    libsctp1 libgnutls30 libgcrypt20 libssl3 libidn12 \
+    libmongoc-1.0-0 libbson-1.0-0 libyaml-0-2 \
+    libnghttp2-14 libmicrohttpd12 libcurl4 \
+    libtalloc2 \
+    iproute2 iputils-ping net-tools tcpdump iptables && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /opt/open5gs /opt/open5gs
+ENV PATH="/opt/open5gs/bin:${PATH}"
+ENV LD_LIBRARY_PATH="/opt/open5gs/lib/x86_64-linux-gnu:${LD_LIBRARY_PATH}"
+
+RUN mkdir -p /etc/open5gs /var/log/open5gs
+COPY config /etc/open5gs
+WORKDIR /opt/open5gs
+
+ENTRYPOINT ["/opt/open5gs/bin/open5gs-nrfd"]
+CMD ["-c", "/etc/open5gs/default.yaml"]
