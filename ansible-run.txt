@@ -1,0 +1,93 @@
+
+PLAY [Deploy Private 5G Core on Kubernetes] ************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [localhost]
+
+TASK [Ensure namespace exists] *************************************************
+ok: [localhost]
+
+TASK [Deploy MongoDB] **********************************************************
+ok: [localhost]
+
+TASK [Wait for MongoDB rollout] ************************************************
+changed: [localhost]
+
+TASK [Deploy NRF] **************************************************************
+changed: [localhost]
+
+TASK [Wait for NRF rollout] ****************************************************
+changed: [localhost]
+
+TASK [Deploy SCP] **************************************************************
+changed: [localhost]
+
+TASK [Wait for SCP rollout] ****************************************************
+changed: [localhost]
+
+TASK [Deploy core NFs (AUSF, UDR, UDM, PCF, NSSF, BSF)] ************************
+changed: [localhost] => (item=ausf)
+changed: [localhost] => (item=udr)
+changed: [localhost] => (item=udm)
+changed: [localhost] => (item=pcf)
+changed: [localhost] => (item=nssf)
+changed: [localhost] => (item=bsf)
+
+TASK [Deploy AMF] **************************************************************
+changed: [localhost]
+
+TASK [Wait for AMF rollout] ****************************************************
+changed: [localhost]
+
+TASK [Deploy SMF] **************************************************************
+changed: [localhost]
+
+TASK [Wait for SMF rollout] ****************************************************
+changed: [localhost]
+
+TASK [Deploy UPF] **************************************************************
+changed: [localhost]
+
+TASK [Wait for UPF rollout] ****************************************************
+changed: [localhost]
+
+TASK [Deploy WebUI] ************************************************************
+changed: [localhost]
+
+TASK [Deploy UERANSIM gNB] *****************************************************
+changed: [localhost]
+
+TASK [Wait for gNB rollout] ****************************************************
+changed: [localhost]
+
+TASK [Deploy UERANSIM UE] ******************************************************
+changed: [localhost]
+
+TASK [Show final pod status] ***************************************************
+changed: [localhost]
+
+TASK [Print final status] ******************************************************
+ok: [localhost] => {
+    "final_status.stdout_lines": [
+        "NAME                             READY   STATUS    RESTARTS      AGE",
+        "mongodb-5486cd6984-qsl9j         1/1     Running   0             3h42m",
+        "open5gs-amf-6667f7d89f-sthsc     1/1     Running   0             3h35m",
+        "open5gs-ausf-6d86ff4c5c-bh4tn    1/1     Running   0             3h35m",
+        "open5gs-bsf-ff8bb7fc5-zm4l8      1/1     Running   0             3h35m",
+        "open5gs-nrf-7c58599b4b-fpd6v     1/1     Running   0             3h35m",
+        "open5gs-nssf-5b89549ffd-wv4zl    1/1     Running   0             3h35m",
+        "open5gs-pcf-b8665c5cc-7mdww      1/1     Running   0             3h35m",
+        "open5gs-scp-74495ff865-p8dp5     1/1     Running   0             3h35m",
+        "open5gs-smf-59c57574f4-hpwrd     0/1     Error     3 (34s ago)   117s",
+        "open5gs-udm-6fbd744b74-5shlt     1/1     Running   0             3h35m",
+        "open5gs-udr-7f8f89f876-dmbx4     1/1     Running   0             3h35m",
+        "open5gs-upf-744b99c6f7-nhlck     1/1     Running   0             3h35m",
+        "open5gs-webui-74dd68b446-zk7kv   1/1     Running   0             3h42m",
+        "ueransim-gnb-98c955888-5dd7j     1/1     Running   0             3h38m",
+        "ueransim-ue-f76f7d99b-cw8rt      1/1     Running   0             3h38m"
+    ]
+}
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=21   changed=17   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+

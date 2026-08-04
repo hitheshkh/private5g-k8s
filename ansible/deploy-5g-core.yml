@@ -1,0 +1,89 @@
+---
+- name: Deploy Private 5G Core on Kubernetes
+  hosts: localhost
+  connection: local
+  vars:
+    namespace: open5gs
+    project_dir: "{{ playbook_dir }}/.."
+
+  tasks:
+    - name: Ensure namespace exists
+      command: kubectl create namespace {{ namespace }}
+      register: ns_result
+      failed_when: ns_result.rc != 0 and 'AlreadyExists' not in ns_result.stderr
+      changed_when: "'created' in ns_result.stdout"
+
+    - name: Deploy MongoDB
+      command: kubectl apply -f {{ project_dir }}/mongodb/
+      register: mongo_result
+      changed_when: "'unchanged' not in mongo_result.stdout"
+
+    - name: Wait for MongoDB rollout
+      command: kubectl rollout status deployment/mongodb -n {{ namespace }} --timeout=120s
+
+    - name: Deploy NRF
+      command: kubectl apply -f {{ project_dir }}/nrf/
+
+    - name: Wait for NRF rollout
+      command: kubectl rollout status deployment/open5gs-nrf -n {{ namespace }} --timeout=120s
+
+    - name: Deploy SCP
+      command: kubectl apply -f {{ project_dir }}/scp/
+
+    - name: Wait for SCP rollout
+      command: kubectl rollout status deployment/open5gs-scp -n {{ namespace }} --timeout=120s
+
+    - name: Deploy core NFs (AUSF, UDR, UDM, PCF, NSSF, BSF)
+      command: kubectl apply -f {{ project_dir }}/{{ item }}/
+      loop:
+        - ausf
+        - udr
+        - udm
+        - pcf
+        - nssf
+        - bsf
+
+    - name: Deploy AMF
+      command: kubectl apply -f {{ project_dir }}/amf/
+
+    - name: Wait for AMF rollout
+      command: kubectl rollout status deployment/open5gs-amf -n {{ namespace }} --timeout=120s
+
+    - name: Deploy SMF
+      command: kubectl apply -f {{ project_dir }}/smf/
+
+    - name: Wait for SMF rollout
+      command: kubectl rollout status deployment/open5gs-smf -n {{ namespace }} --timeout=120s
+
+    - name: Deploy UPF
+      command: kubectl apply -f {{ project_dir }}/upf/
+
+    - name: Wait for UPF rollout
+      command: kubectl rollout status deployment/open5gs-upf -n {{ namespace }} --timeout=120s
+
+    - name: Deploy WebUI
+      command: kubectl apply -f {{ project_dir }}/webui/
+
+    - name: Deploy UERANSIM gNB
+      command: >
+        kubectl apply
+        -f {{ project_dir }}/ueransim/gnb-configmap.yaml
+        -f {{ project_dir }}/ueransim/gnb-deployment.yaml
+        -f {{ project_dir }}/ueransim/gnb-service.yaml
+
+    - name: Wait for gNB rollout
+      command: kubectl rollout status deployment/ueransim-gnb -n {{ namespace }} --timeout=120s
+
+    - name: Deploy UERANSIM UE
+      command: >
+        kubectl apply
+        -f {{ project_dir }}/ueransim/ue-configmap.yaml
+        -f {{ project_dir }}/ueransim/ue-deployment.yaml
+
+    - name: Show final pod status
+      command: kubectl get pods -n {{ namespace }}
+      register: final_status
+
+    - name: Print final status
+      debug:
+        var: final_status.stdout_lines

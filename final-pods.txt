@@ -1,0 +1,17 @@
+NAME                             READY   STATUS     RESTARTS   AGE
+mongodb-5486cd6984-qsl9j         1/1     Running    0          3h41m
+open5gs-amf-6667f7d89f-sthsc     1/1     Running    0          3h35m
+open5gs-ausf-6d86ff4c5c-bh4tn    1/1     Running    0          3h35m
+open5gs-bsf-ff8bb7fc5-zm4l8      1/1     Running    0          3h35m
+open5gs-nrf-7c58599b4b-fpd6v     1/1     Running    0          3h35m
+open5gs-nssf-5b89549ffd-wv4zl    1/1     Running    0          3h35m
+open5gs-pcf-b8665c5cc-7mdww      1/1     Running    0          3h35m
+open5gs-scp-74495ff865-p8dp5     1/1     Running    0          3h35m
+open5gs-smf-59c57574f4-hpwrd     0/1     Init:0/1   0          65s
+open5gs-smf-6f7bd5465c-ddw9r     1/1     Running    0          3h35m
+open5gs-udm-6fbd744b74-5shlt     1/1     Running    0          3h35m
+open5gs-udr-7f8f89f876-dmbx4     1/1     Running    0          3h35m
+open5gs-upf-744b99c6f7-nhlck     1/1     Running    0          3h35m
+open5gs-webui-74dd68b446-zk7kv   1/1     Running    0          3h41m
+ueransim-gnb-98c955888-5dd7j     1/1     Running    0          3h37m
+ueransim-ue-f76f7d99b-cw8rt      1/1     Running    0          3h37m

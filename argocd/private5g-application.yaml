@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+
+metadata:
+  name: private5g-core
+  namespace: argocd
+
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/hitheshkh/private5g-k8s.git
+    targetRevision: main
+    path: .
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: open5gs
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
